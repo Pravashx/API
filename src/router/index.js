@@ -1,13 +1,11 @@
 const router = require('express').Router();
+const authRouter = require('../app/auth/auth.router')
+const categoryRouter = require('../app/category/category.router')
 
-router.route('/category')
-.post((req, res, next)=>{})
-.get((req, res, next)=>{})
+router.use(authRouter)
+router.use('/category',categoryRouter)
 
-router.route('/category/:id')
-.get((req, res, next)=>{})
-.put((req, res, next)=>{})
-.delete((req, res, next)=>{})
+
 
 
 
