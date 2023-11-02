@@ -3,8 +3,10 @@ const dotenv = require('dotenv')
 dotenv.config();
 
 const { z } = require("zod")
-const { generateRandomString } = require('../../config/helpers')
-const nodemailer = require('nodemailer')
+const { generateRandomString } = require('../../config/helpers');
+const mailSvc = require('../../services/mail.service');
+const authSvc = require('./auth.services');
+
 class AuthController {
     register = async (req, res, next) => {
 
@@ -39,40 +41,14 @@ class AuthController {
             // TODO: DB Store
 
 
-            // Mail, OTP
-            const transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: process.env.SMTP_PORT,
-                auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASS
-                }
-            });
+           let mailMsg = authSvc.registerEmailMessage(payload.name, payload.token)
 
-             /** Email compulsory ho vane write awai*/
-                const mailAck = await transporter.sendMail({
-                to: payload.email,
-                from: "Test@gmail.com",
-                subject: "Activate your account",
-                html: `<b> Dear ${payload.name}<b/><br/>
-                <p> Your account has been successfully registerd. Please copy or click the link below to activate your account</p>
-                <a href = "http://localhost:5173/activate/${payload.token}">
-                http://localhost:5173/activate/${payload.token}
-                <a/><br/>
-
-                <p>
-                    <b> Regards </b>
-                </p>
-                <p>
-                    <b> System Admin</b>
-                </p>
-                <p>
-                   <em> <small>Please do not reply to this email </small> </em>
-                </p>
-                `,
-                text: ""
-            })
-            console.log(mailAck)
+             /** Email compulsory ho vane write await*/
+                const mailAck = await mailSvc.emailSend(
+               payload.email,
+                "Activate your account",
+                mailMsg
+            )
             res.json({
                 result: payload
             })
@@ -83,8 +59,32 @@ class AuthController {
         }
     }
 
-    verifyToken = (req, res, next) => { }
-    setPassword = (req, res, next) => { }
+    verifyToken = (req, res, next) => { 
+        try{
+            let token = req.params.token
+            if(token){
+                res.json({
+                    result: {},
+                    msg: "Valid Token",
+                    meta: null
+                })
+            }else{
+                next({code: 400, message: "Invalid or expired token"})
+            }
+        }catch(except){
+            next(except)
+        }
+    }
+    async setPassword (req, res, next){
+        try{
+            let data = req.body
+            res.json({
+                result: data
+            })
+        }catch(except){
+            next(except)
+        }
+     }
 
     login = (req, res, next) => {
 
