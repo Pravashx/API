@@ -6,6 +6,8 @@ const { z } = require("zod")
 const { generateRandomString } = require('../../config/helpers');
 const mailSvc = require('../../services/mail.service');
 const authSvc = require('./auth.services');
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 class AuthController {
     register = async (req, res, next) => {
@@ -75,19 +77,69 @@ class AuthController {
             next(except)
         }
     }
+
     async setPassword (req, res, next){
         try{
             let data = req.body
+            let token = req.params.token
+            //TODO: DB Update
+            let encPass = bcrypt.hashSync(data.password, 10)
+
             res.json({
-                result: data
+                result: encPass
             })
         }catch(except){
             next(except)
         }
      }
 
-    login = (req, res, next) => {
+    async login (req, res, next){
+        
+        try{
+            let credentials = req.body;
+            let userDetail = {
+                _id: "qw12314",
+                name: "Pravash Thakuri",
+            email: "pravashotaku@gmail.com",
+            role: "admin",
+            status: "active",
+            token: null,
+            password : "$2a$10$FAIYqZznn1qIQDwkKUzrfez25v44PUZ7zXHPEfSR9u6Gau8F5pLwS"
+            }
 
+
+            if(bcrypt.compareSync(credentials.password, userDetail.password)){
+                let token = jwt.sign({
+                    userId: userDetail._id
+                },process.env.JWT_SECRET,{
+                     expiresIn: "1h" // Default is 3hr
+                })
+
+                let refreshToken = jwt.sign({
+                    userId: userDetail._id
+                },process.env.JWT_SECRET,{
+                     expiresIn: "1d" 
+                })
+
+
+                res.json({
+                    result: {
+                        token: token,
+                        refreshToken: refreshToken,
+                        type: "Bearer"
+                    }
+                })
+            }else{
+                next({code: 400, message: "Credential does not match."})
+            }
+        }catch(except){
+            next(except)
+        }
+    }
+    getLoggedInUser(req, res, next){
+        res.json({
+            result: req.authUser
+        })
     }
 
     forgetPassword = (req, res, next) => {
