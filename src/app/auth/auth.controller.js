@@ -8,23 +8,15 @@ const mailSvc = require('../../services/mail.service');
 const authSvc = require('./auth.services');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const {MongoClient} = require("mongodb");
+const { response } = require('express');
+const {dbSvc} = require('../../services/db.service')
 
 class AuthController {
     register = async (req, res, next) => {
 
         try {
             let payload = req.body;
-
-
-            /** Name And Email Validation  (GOOD PACKAGE = zod, joi YUP, ajv, class-validator)
-            if (!payload.name || payload.name === null || payload.name === "null") {
-                next({ code: 400, messge: "Validation Failure", result: { name: "Name is required" } })
-            }
-            if (!payload.email || payload.email === null || payload.email === "null") {
-                next({ code: 400, messge: "Validation Failure", result: { email: "Email is required" } })
-            } else if (!payload.email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)) {
-                next({ code: 400, messge: "Validation Failure", result: { email: "Invalid Email"}})
-             }   */
 
             // FILE
             // let file = req.file
@@ -40,19 +32,25 @@ class AuthController {
             payload.status = "inactive";
             payload.token = generateRandomString();
 
-            // TODO: DB Store
-
+       
+            // let response = await dbSvc.db.collection('users').insertOne(payload)
+            let response = await authSvc.registerUser(payload)
+            
+            
+            
 
            let mailMsg = authSvc.registerEmailMessage(payload.name, payload.token)
 
              /** Email compulsory ho vane write await*/
-                const mailAck = await mailSvc.emailSend(
+                await mailSvc.emailSend(
                payload.email,
                 "Activate your account",
                 mailMsg
             )
             res.json({
-                result: payload
+                result: response,
+                msg: 'User registered succesfully.',
+                meta: null
             })
         }
         catch (except) {
@@ -61,18 +59,24 @@ class AuthController {
         }
     }
 
-    verifyToken = (req, res, next) => { 
+    verifyToken = async (req, res, next) => { 
         try{
             let token = req.params.token
-            if(token){
-                res.json({
-                    result: {},
-                    msg: "Valid Token",
-                    meta: null
-                })
-            }else{
-                next({code: 400, message: "Invalid or expired token"})
-            }
+
+            //query
+            let userDetail= await authSvc.getuserByFilter(token);
+
+
+
+           if(userDetail){
+            res.json({
+                result: userDetail,
+                msg: "Token Verified",
+                meta: null
+            })
+           }else{
+            next({code: 400, message: "Token Does not Exists", result: {token}})
+           }
         }catch(except){
             next(except)
         }
@@ -82,12 +86,30 @@ class AuthController {
         try{
             let data = req.body
             let token = req.params.token
-            //TODO: DB Update
-            let encPass = bcrypt.hashSync(data.password, 10)
-
-            res.json({
-                result: encPass
+            let userDetail = await authSvc.getuserByFilter({
+                token: token
             })
+            //TODO: DB Update         
+            if(userDetail){
+                let encPass = bcrypt.hashSync(data.password, 10);
+
+                const updateData = {
+                    password: encPass,
+                    token: null,
+                    status: 'active'
+                }
+
+                let updateResponse = await authSvc.updateUser({token: token}, updateData)
+
+                res.json({
+                    result: updateResponse,
+                    message: "User Activated Succesfully",
+                    meta: null
+                })
+            }else{
+                next({code: 400, message: "User Does not exists/token expired/broken", token: data})
+            }
+            
         }catch(except){
             next(except)
         }
