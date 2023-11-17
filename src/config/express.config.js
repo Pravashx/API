@@ -1,8 +1,10 @@
 const express = require('express')
 const app = express();
+require('./db.config')
 const router = require('../router/index');
 const { MulterError } = require('multer');
 const {ZodError} = require('zod')
+const {MongooseError} =require('mongoose')
 
 // Body Parser
 app.use(express.json())
@@ -57,6 +59,17 @@ app.use((error, req, res, next)=>{
         })
         message = "Validation Failure"
         result = msg
+    }
+    if(error.code === 11000){
+        code = 400;
+        let uniqueKeys = Object.keys(error.keyPattern)
+        let msgBody = uniqueKeys.map((key) => {
+            return {
+                [key]: key+" should be unique"
+            }
+        }) 
+        result = msgBody;
+        message ="Validation Fail"
     }
 
     res.status(code).json({

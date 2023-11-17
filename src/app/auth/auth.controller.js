@@ -8,13 +8,9 @@ const mailSvc = require('../../services/mail.service');
 const authSvc = require('./auth.services');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const {MongoClient} = require("mongodb");
-const { response } = require('express');
-const {dbSvc} = require('../../services/db.service')
 
 class AuthController {
     register = async (req, res, next) => {
-
         try {
             let payload = req.body;
 
