@@ -1,4 +1,5 @@
 const UserModel = require('../user/user.model')
+const PATModel = require('./personal-access-token.model')
 
 require("dotenv").config()
 class AuthService{
@@ -38,6 +39,41 @@ class AuthService{
             throw exception
         }
     }
+
+    storePAT = async (data)=>{
+        try{
+            let patObj = new PATModel(data)
+            return await patObj.save()
+        }catch(exception){
+            throw exception
+        }
+    }
+    getPatByToken = async(token)=>{
+        try{
+            let patData = await PATModel.findOne({
+                token: token
+            })
+            return patData;
+        }catch(exception){
+            throw exception
+        }
+    }
+
+    deletePatData = async(token)=>{
+        try{
+            let deleted = await PATModel.findOneAndDelete({
+                token: token
+            })
+            if(deleted){
+                return deleted
+            }else{
+                throw{code: 404, message: "Token does not exists"}
+            }
+        }catch(exception){
+
+        }
+    }
+
     updateUser = async(filter, data) =>{
         try{
             let response = await UserModel.updateOne(filter,{
