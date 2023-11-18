@@ -1,6 +1,12 @@
 const express = require('express')
 const app = express();
 require('./db.config')
+const cors = require('cors')
+
+app.use(cors({
+    origin: "*"
+}))
+
 const router = require('../router/index');
 const { MulterError } = require('multer');
 const {ZodError} = require('zod')

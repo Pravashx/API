@@ -84,6 +84,26 @@ class AuthService{
             throw exception;
         }
     }
+
+    forgetPasswordMessage(name, token) {
+        // TODO: DB table msg
+        return `
+                    <b>Dear ${name}</b><br/>
+                    <p>Please check the link below for resetting your password: </p>
+                    <a href="${process.env.FRONTEND_URL}/set-password/${token}">
+                        ${process.env.FRONTEND_URL}/set-password/${token}
+                    </a><br/>
+                    <p>
+                        <b>Regards</b>
+                    </p>
+                    <p>
+                        <b>System Admin</b>
+                    </p>
+                    <p>
+                        <em><small>Please do not reply to this email.</small></em>
+                    </p>
+                `
+    }
 }
 
 const authSvc = new AuthService()
