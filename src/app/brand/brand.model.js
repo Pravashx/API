@@ -1,12 +1,17 @@
 const mongoose = require('mongoose')
-const BannerSchemaDef = new mongoose.Schema({
+const BrandSchemaDef = new mongoose.Schema({
 
     title:{
         type: String,
         required: true,
+        unique: true,
         min: 3
     },
-    url : String,
+    slug: {
+        type: String,
+        unique: true,
+    },
+    description: String,
     image: {
         type: String,
         required: true
@@ -27,6 +32,6 @@ const BannerSchemaDef = new mongoose.Schema({
     timestamps: true
 })
 
-const BannerModel = mongoose.model('Banner', BannerSchemaDef)
+const BrandModel = mongoose.model('Brand', BrandSchemaDef)
 
-module.exports = BannerModel
+module.exports = BrandModel

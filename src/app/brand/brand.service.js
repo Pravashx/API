@@ -1,6 +1,7 @@
-const BannerModel = require('./banner.model')
+const slugify = require('slugify')
+const BrandModel = require('./brand.model')
 
-class BannerService{
+class BrandService{
     transformCreateRequest = (request, isEdit = false) =>{
         let data = {
             ...request.body
@@ -12,9 +13,14 @@ class BannerService{
                 data.image = request.file.filename
             }
         }
+        // Slug
+        data.slug = slugify(request.body.title, {
+            replacement: "-",
+            lower: true
+        })
 
         if(!isEdit){
-            data.createdBy = request.authUser._id;
+            data.createdBy = request?.authUser?._id || null;
         }
         return data;
     }
@@ -23,17 +29,16 @@ class BannerService{
         let data = {
             ...request.body
         }
-        if(request.file && request.file !== undefined){
+        if(request.file){
            data.image = request.file.filename
-           // TODO: Delete old image after update operation
         }
         return data;
     }
 
-    storeBanner = async (payload) =>{
+    storeBrand = async (payload) =>{
         try{
-            let banner = new BannerModel(payload)
-            return await banner.save()
+            let brand = new BrandModel(payload)
+            return await brand.save()
         }catch(exception){
             throw exception
         }
@@ -41,7 +46,7 @@ class BannerService{
 
     listAllData = async(filter = {}, paging = {offset: skip, limit:15}, options = {sort: {_id: 1}}) =>{
         try{
-            let list = await BannerModel.find(filter)
+            let list = await BrandModel.find(filter)
                             .populate('createdBy', ['_id', 'name', 'email', 'role', 'image'])
                             .sort(options.sort)
                             .skip(paging.offset)
@@ -54,7 +59,7 @@ class BannerService{
 
     countData = async(filter = {}) => {
         try {
-            let count = await BannerModel.countDocuments(filter);
+            let count = await BrandModel.countDocuments(filter);
             return count;
         } catch(exception) {
             throw exception
@@ -62,37 +67,35 @@ class BannerService{
     }
     getById = async(filter) =>{
         try{
-            console.log(filter)
-            let data = await BannerModel.findOne(filter)
+            let data = await BrandModel.findOne(filter)
              .populate('createdBy', ['_id', 'name', 'email', 'role', 'image'])  
-
+             
              if(data){
                 return data
              }else{
-                throw{code: 404, message: "Banner does not exists"}
+                throw{code: 404, message: "Brand does not exists"}
              }
         }catch(exception){
             console.log('getByIdSvc: ', exception)
             throw exception
         }
     }
-    updateById = async (bannerId, payload) =>{
+    updateById = async (brandId, payload) =>{
         try{
-            let response = await BannerModel.findByIdAndUpdate(bannerId, {
+            let response = await BrandModel.findByIdAndUpdate(brandId, {
                 $set: payload
             })
-            return response
         }catch(exception){
             throw exception
         }
     }
-    deleteById = async(bannerId)=>{
+    deleteById = async(brandId)=>{
         try{
-            let response = await BannerModel.findByIdAndDelete(bannerId)
+            let response = await BrandModel.findByIdAndDelete(brandId)
             if(response){
                 return response
             }else{
-                throw{code: 404, message: "Banner already deleted or does not exists"}
+                throw{code: 404, message: "Brand already deleted or does not exists"}
             }
         }catch(exception){
             throw exception
@@ -100,6 +103,6 @@ class BannerService{
     }
 }
 
-const bannerSvc = new BannerService()
-module.exports = bannerSvc
+const brandSvc = new BrandService()
+module.exports = brandSvc
 

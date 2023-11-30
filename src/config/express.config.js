@@ -3,9 +3,7 @@ const app = express();
 require('./db.config')
 const cors = require('cors')
 
-app.use(cors({
-    origin: "*"
-}))
+app.use(cors())
 
 const router = require('../router/index');
 const { MulterError } = require('multer');
@@ -43,7 +41,6 @@ app.use((error, req, res, next)=>{
     let result = error.result ?? null
 
     // TODO: Handle different type of exception
-
     if(error instanceof MulterError){
         //Handle Multer Errors
         if(error.code == 'LIMIT_FILE_SIZE'){
@@ -55,9 +52,8 @@ app.use((error, req, res, next)=>{
     // TODO: Form Validation Formatting (ZOD)
     if(error instanceof ZodError){
         code = 400;
-        let zodErrors = error.errors;
         let msg = {}
-        zodErrors.map((err)=>{
+        error.errors.map((err)=>{
             // msg.push({
             //     [err.path[0]]: err.message       (FOR msg = ARRAY)
             // })

@@ -2,9 +2,10 @@ const router = require('express').Router()
 const authCtrl = require('./auth.controller')
 const uploader = require('../../middlewares/uploader.middleware');
 const ValidateRequest = require('../../middlewares/validate-request-middleware');
-const CheckLogin = require('../../middlewares/auth.middleware')
 const { registerSchema, passwordSchema, loginSchema, emailValidationSchema} = require('./auth.validator');
+const CheckLogin = require('../../middlewares/auth.middleware')
 const CheckPermission = require('../../middlewares/rbac.middleware');
+const {z}= require('zod')
 
 
 const dirSetup = (req, res, next)=>{
@@ -15,7 +16,7 @@ const dirSetup = (req, res, next)=>{
 // Auth and Authorization routes 
 router.post('/register',dirSetup, uploader.single('image'),ValidateRequest(registerSchema), authCtrl.register)
 router.get('/verify-token/:token', authCtrl.verifyToken)
-router.post('/set-password/:token', ValidateRequest(passwordSchema),authCtrl.setPassword)
+router.post('/set-password/:token', ValidateRequest(passwordSchema),authCtrl.setpassword)
 
 router.post('/login', ValidateRequest(loginSchema),authCtrl.login)
 
@@ -29,7 +30,7 @@ router.post('/forget-password', ValidateRequest(emailValidationSchema),authCtrl.
 
 router.post('/reset-password/:resetToken', ValidateRequest(passwordSchema), authCtrl.resetPassword)
 
-router.post('/logout', CheckLogin, authCtrl.logout)
+router.post('/logout', CheckLogin, authCtrl.logoutUser)
 
 module.exports = router;
 

@@ -22,6 +22,27 @@ class AuthService{
                     </p>
                 `
     }
+
+    forgetPasswordMessage(name, token) {
+        // TODO: DB table msg
+        return `
+                    <b>Dear ${name}</b><br/>
+                    <p>Please check the link below for resetting your password: </p>
+                    <a href="${process.env.FRONTEND_URL}/set-password/${token}">
+                        ${process.env.FRONTEND_URL}/set-password/${token}
+                    </a><br/>
+                    <p>
+                        <b>Regards</b>
+                    </p>
+                    <p>
+                        <b>System Admin</b>
+                    </p>
+                    <p>
+                        <em><small>Please do not reply to this email.</small></em>
+                    </p>
+                `
+    }
+
     registerUser = async (payload) =>{
         try{
             let user = new UserModel(payload)
@@ -31,6 +52,7 @@ class AuthService{
             throw exception
         }
     }
+    
     getuserByFilter = async(filter) =>{
         try{
             let userDetail = await UserModel.findOne(filter)
@@ -48,6 +70,7 @@ class AuthService{
             throw exception
         }
     }
+
     getPatByToken = async(token)=>{
         try{
             let patData = await PATModel.findOne({
@@ -85,25 +108,6 @@ class AuthService{
         }
     }
 
-    forgetPasswordMessage(name, token) {
-        // TODO: DB table msg
-        return `
-                    <b>Dear ${name}</b><br/>
-                    <p>Please check the link below for resetting your password: </p>
-                    <a href="${process.env.FRONTEND_URL}/set-password/${token}">
-                        ${process.env.FRONTEND_URL}/set-password/${token}
-                    </a><br/>
-                    <p>
-                        <b>Regards</b>
-                    </p>
-                    <p>
-                        <b>System Admin</b>
-                    </p>
-                    <p>
-                        <em><small>Please do not reply to this email.</small></em>
-                    </p>
-                `
-    }
 }
 
 const authSvc = new AuthService()

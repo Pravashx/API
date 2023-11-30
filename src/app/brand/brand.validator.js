@@ -1,12 +1,12 @@
 const { z } = require('zod')
 
 
-const BannerRequestSchema = z.object({
+const BrandRequestSchema = z.object({
     title: z.string().min(3),
-    url: z.string().url().nullable(),
+    description: z.string().nullable(),
     status: z.string().regex(/active|inactive/)
 })
 
 module.exports = {
-    BannerRequestSchema
+    BrandRequestSchema
 }
