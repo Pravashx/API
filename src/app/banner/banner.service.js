@@ -1,100 +1,100 @@
 const BannerModel = require('./banner.model')
 
-class BannerService{
-    transformCreateRequest = (request, isEdit = false) =>{
+class BannerService {
+    transformCreateRequest = (request, isEdit = false) => {
         let data = {
             ...request.body
         }
-        if(!request.file && !isEdit){
-            throw{code: 400, message: "Image is required", result: data}
-        }else{
-            if(request.file){
+        if (!request.file && !isEdit) {
+            throw { code: 400, message: "Image is required", result: data }
+        } else {
+            if (request.file) {
                 data.image = request.file.filename
             }
         }
 
-        if(!isEdit){
+        if (!isEdit) {
             data.createdBy = request.authUser._id;
         }
         return data;
     }
 
-    transformEditRequest = (request) =>{
+    transformEditRequest = (request) => {
         let data = {
             ...request.body
         }
-        if(request.file && request.file !== undefined){
-           data.image = request.file.filename
-           // TODO: Delete old image after update operation
+        if (request.file && request.file !== undefined) {
+            data.image = request.file.filename
+            // TODO: Delete old image after update operation
         }
         return data;
     }
 
-    storeBanner = async (payload) =>{
-        try{
+    storeBanner = async (payload) => {
+        try {
             let banner = new BannerModel(payload)
             return await banner.save()
-        }catch(exception){
+        } catch (exception) {
             throw exception
         }
     }
 
-    listAllData = async(filter = {}, paging = {offset: skip, limit:15}, options = {sort: {_id: 1}}) =>{
-        try{
+    listAllData = async (filter = {}, paging = { offset: skip, limit: 15 }, options = { sort: { _id: 1 } }) => {
+        try {
             let list = await BannerModel.find(filter)
-                            .populate('createdBy', ['_id', 'name', 'email', 'role', 'image'])
-                            .sort(options.sort)
-                            .skip(paging.offset)
-                            .limit(paging.limit)
+                .populate('createdBy', ['_id', 'name', 'email', 'role', 'image'])
+                .sort(options.sort)
+                .skip(paging.offset)
+                .limit(paging.limit)
             return list;
-        }catch(exception){
+        } catch (exception) {
             throw exception
         }
     }
 
-    countData = async(filter = {}) => {
+    countData = async (filter = {}) => {
         try {
             let count = await BannerModel.countDocuments(filter);
             return count;
-        } catch(exception) {
+        } catch (exception) {
             throw exception
         }
     }
-    getById = async(filter) =>{
-        try{
+    getById = async (filter) => {
+        try {
             console.log(filter)
             let data = await BannerModel.findOne(filter)
-             .populate('createdBy', ['_id', 'name', 'email', 'role', 'image'])  
+                .populate('createdBy', ['_id', 'name', 'email', 'role', 'image'])
 
-             if(data){
+            if (data) {
                 return data
-             }else{
-                throw{code: 404, message: "Banner does not exists"}
-             }
-        }catch(exception){
+            } else {
+                throw { code: 404, message: "Banner does not exists" }
+            }
+        } catch (exception) {
             console.log('getByIdSvc: ', exception)
             throw exception
         }
     }
-    updateById = async (bannerId, payload) =>{
-        try{
+    updateById = async (bannerId, payload) => {
+        try {
             let response = await BannerModel.findByIdAndUpdate(bannerId, {
                 $set: payload
             })
             return response
-        }catch(exception){
+        } catch (exception) {
             throw exception
         }
     }
-    deleteById = async(bannerId)=>{
-        try{
+    deleteById = async (bannerId) => {
+        try {
             let response = await BannerModel.findByIdAndDelete(bannerId)
-            if(response){
+            if (response) {
                 return response
-            }else{
-                throw{code: 404, message: "Banner already deleted or does not exists"}
+            } else {
+                throw { code: 404, message: "Banner already deleted or does not exists" }
             }
-        }catch(exception){
+        } catch (exception) {
             throw exception
         }
     }

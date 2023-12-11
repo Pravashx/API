@@ -1,45 +1,45 @@
 const { default: slugify } = require("slugify");
 
-class CategoryRequest{
+class CategoryRequest {
     data;
     file;
     user;
-    constructor(req){
+    constructor(req) {
         this.data = req.body
         this.file = req.file
         this.user = req.authUser
     }
-    createTransform = () =>{
+    createTransform = () => {
         let payload = {
             ...this.data
         }
 
-        if(this.file){
+        if (this.file) {
             payload.image = this.file.filename
-        }else{
+        } else {
             payload.image = null
         }
-        payload.slug = slugify(this.data.title, {lower: true})
+        payload.slug = slugify(this.data.title, { lower: true })
 
-        if(!this.data.parentId || this.data.parentId === 'null' || this.data.parentId === ''){
+        if (!this.data.parentId || this.data.parentId === 'null' || this.data.parentId === '') {
             payload.parentId = null
         }
         payload.createdBy = this.user._id
         return payload
     }
 
-    updateTransform = (category) =>{
+    updateTransform = (category) => {
         let payload = {
             ...this.data
         }
 
-        if(this.file){
+        if (this.file) {
             payload.image = this.file.filename
-        }else{
+        } else {
             payload.image = category.image
         }
 
-        if(!this.data.parentId || this.data.parentId === 'null' || this.data.parentId === ''){
+        if (!this.data.parentId || this.data.parentId === 'null' || this.data.parentId === '') {
             payload.parentId = null
         }
         return payload

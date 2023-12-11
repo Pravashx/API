@@ -1,4 +1,5 @@
 const express = require('express')
+const EventEmitter = require('node:events')
 const app = express();
 require('./db.config')
 const cors = require('cors')
@@ -9,19 +10,89 @@ const router = require('../router/index');
 const { MulterError } = require('multer');
 const {ZodError} = require('zod')
 const {MongooseError} =require('mongoose')
-
+const event = require('./event.config');
+const { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLList, GraphQLID, GraphQLInt, GraphQLFloat } = require('graphql');
+const { createHandler } = require('graphql-http/lib/use/express');
+const categorySvc = require('../app/category/category.service');
+const { graphqlHTTP } = require('express-graphql');
 // Body Parser
 app.use(express.json())
 app.use(express.urlencoded({
     extended: false
 }))
 
-
 app.use('/health', (req, res, next)=>{
     res.send("Success Ok")
 })
-
+app.use(event)
 app.use('/api/v1', router)
+
+
+
+const Product = new GraphQLObjectType({
+    name: "Product",
+    fields: { 
+            _id: {type: GraphQLID},
+            title: {type: GraphQLString},
+            status: {type: GraphQLString},
+            description: {type: GraphQLString}
+            // summary: {type: GraphQLString},
+            // category: {type: GraphQLString},
+            // price: {type: GraphQLFloat}
+    }
+})
+
+const ProductInputType = new GraphQLObjectType({
+    name: "ProductInput",
+    fields: {
+        _id: {type: GraphQLID},
+        title: {type: GraphQLString},
+        status: {type: GraphQLString}
+    }
+})
+
+const schema = new GraphQLSchema({
+    query: new GraphQLObjectType({
+        name: 'Query',
+        fields: {
+            products: {
+                type: new GraphQLList(Product),
+                resolve: async()=>{
+                   let data = await categorySvc.getData({}, {limit: 10, skip: 0})
+                   return data
+                }
+            }
+        }
+    }),
+    mutation: new GraphQLObjectType({
+        name: "Mutation",
+        fields: {
+            createProduct: {
+                args: {
+                    title: GraphQLString,
+                    status: GraphQLString
+                },
+                type: Product,
+                resolve: (args)=>{
+                    console.log(args)
+                    return{
+                        _id: "", title: "", status: ""
+                    }
+                }
+            }
+        }
+    })
+})
+
+app.use('/api/v1/graphql', graphqlHTTP({
+    schema: schema,
+    graphiql: true
+}))
+
+// app.all('/api/v1/graphql', createHandler({
+//     schema: schema
+// }))
+
 
 
 // 404 Error Handle 

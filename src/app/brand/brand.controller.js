@@ -1,38 +1,39 @@
 const { deleteFile } = require("../../config/helpers");
 const brandSvc = require("./brand.service");
+const productSvc = require('../product/product.service')
 const fs = require('fs')
 
-class BrandController{
+class BrandController {
 
-    brandCreate =async (req, res, next)=>{
-        try{
+    brandCreate = async (req, res, next) => {
+        try {
             const payload = brandSvc.transformCreateRequest(req);
-            const created = await brandSvc.storeBanner(payload);
+            const created = await brandSvc.storeBrand(payload);
             res.json({
                 result: created,
                 message: "Brand Created Succesfully",
                 metal: null
             })
-        }catch(exception){
+        } catch (exception) {
             next(exception)
         }
     }
-    listAllBrands = async (req, res, next) =>{
-        try{
+    listAllBrands = async (req, res, next) => {
+        try {
             let filter = {};
-            if(req.query['search']){
-                filter={
+            if (req.query['search']) {
+                filter = {
                     $or: [
-                        {title: new RegExp(req.query['search'], 'i')},
-                        {status: new RegExp(req.query['search'], 'i')}
+                        { title: new RegExp(req.query['search'], 'i') },
+                        { status: new RegExp(req.query['search'], 'i') }
                     ]
-                }              
+                }
             }
             filter = {
                 $and: [
-                    {createdBy: req.authUser._id},
-                    {...filter}
-                    ]
+                    { createdBy: req.authUser._id },
+                    { ...filter }
+                ]
             }
 
             // SELECT
@@ -42,9 +43,9 @@ class BrandController{
 
             let total = await brandSvc.countData(filter)
 
-            let skip = (page-1)*limit
+            let skip = (page - 1) * limit
 
-            let list = await brandSvc.listAllData(filter, {offset: skip, limit:limit})
+            let list = await brandSvc.listAllData(filter, { offset: skip, limit: limit })
             res.json({
                 result: list,
                 message: "Brand Fetched Successfully",
@@ -54,12 +55,12 @@ class BrandController{
                     limit: limit
                 }
             })
-        }catch(exception){
+        } catch (exception) {
             next(exception)
         }
     }
-    getDataById = async (req, res, next) =>{
-        try{
+    getDataById = async (req, res, next) => {
+        try {
             let id = req.params.id;
             let data = await brandSvc.getById({
                 _id: id,
@@ -70,46 +71,46 @@ class BrandController{
                 message: "Brand Fetched",
                 meta: null
             })
-        }catch(exception){
+        } catch (exception) {
             next(exception)
         }
     }
-    updateById = async(req, res, next)=>{
-        try{
+    updateById = async (req, res, next) => {
+        try {
             const brandId = req.params.id;
             const brandDetail = await brandSvc.getById({
                 _id: brandId,
                 createdBy: req.authUser._id
             })
             // Update Operation
-           const payload = brandSvc.transformEditRequest(req)
-           if(!payload.image || payload.image=== ''){
-            delete payload.image
-           }
-           const oldBrand = await brandSvc.updateById(brandId, payload)
-           if(payload.image){
-            // Delete old Img
-            deleteFile("./public/uploads/brand/", oldBrand.image)
-           }
-           res.json({
-            result: oldBrand,
-            message: "Brand Updated Sucessfully",
-            meta: null
-           })
-        
-        }catch(exception){
+            const payload = brandSvc.transformEditRequest(req)
+            if (!payload.image || payload.image === '') {
+                delete payload.image
+            }
+            const oldBrand = await brandSvc.updateById(brandId, payload)
+            if (payload.image) {
+                // Delete old Img
+                deleteFile("./public/uploads/brand/", oldBrand.image)
+            }
+            res.json({
+                result: oldBrand,
+                message: "Brand Updated Sucessfully",
+                meta: null
+            })
+
+        } catch (exception) {
             next(exception)
         }
     }
-    deleteById = async( req, res, next)=>{
-        try{
+    deleteById = async (req, res, next) => {
+        try {
             let brandId = req.params.id;
             await brandSvc.getById({
                 _id: id,
                 createdBy: req.authUser._id
             })
             let deleteBrand = await brandSvc.deleteById(brandId)
-            if(deletedBrand.image){
+            if (deletedBrand.image) {
                 deleteFile('./public/uploads/brand/', deleteBrand.image)
             }
             res.json({
@@ -117,43 +118,43 @@ class BrandController{
                 message: "Brand Deleted Successfully",
                 meta: null
             })
-        }catch(exception){
+        } catch (exception) {
             next(exception)
         }
     }
-    listHome = async (req, res, next)=>{
-        try{
-                let filter = {};
-                if(req.query['search']){
-                    filter={
-                        $or: [
-                            {title: new RegExp(req.query['search'], 'i')},
-                            {status: new RegExp(req.query['search'], 'i')}
-                        ]
-                    }              
-                }
+    listHome = async (req, res, next) => {
+        try {
+            let filter = {};
+            if (req.query['search']) {
                 filter = {
-                    $and: [
-                        {status: "active"},
-                        {...filter}
-                        ]
+                    $or: [
+                        { title: new RegExp(req.query['search'], 'i') },
+                        { status: new RegExp(req.query['search'], 'i') }
+                    ]
                 }
-    
-                // SELECT
-    
-                let page = req.query['page'] || 1;
-                let limit = req.query['limit'] || 10;
-    
-                let total = await brandSvc.countData(filter)
-    
-                let skip = (page-1)*limit
-                let sort = {_id: "DESC"}
-                // Sort = Title = desce
-                if(req.query.sort){
-                    let split = req.query.sort.split(",")
-                    sort = {[split[0]]: split[1] }
-                }
-            let response = await brandSvc.listAllData(filter, {offset: skip, limit:limit}, {
+            }
+            filter = {
+                $and: [
+                    { status: "active" },
+                    { ...filter }
+                ]
+            }
+
+            // SELECT
+
+            let page = req.query['page'] || 1;
+            let limit = req.query['limit'] || 10;
+
+            let total = await brandSvc.countData(filter)
+
+            let skip = (page - 1) * limit
+            let sort = { _id: 'desc' }
+            // Sort = Title = desce
+            if (req.query.sort) {
+                let split = req.query.sort.split(",")
+                sort = { [split[0]]: split[1] }
+            }
+            let response = await brandSvc.listAllData(filter, { offset: skip, limit: limit }, {
                 sort: sort
             })
             res.json({
@@ -165,27 +166,42 @@ class BrandController{
                     limit: limit
                 }
             })
-        }catch(exception){
+        } catch (exception) {
             next(exception)
         }
     }
-    getDetailBySlug = async(req, res, next) =>{
-        try{
+    getDetailBySlug = async (req, res, next) => {
+        try {
             let brandDetail = await brandSvc.getById({
                 slug: req.params.slug,
                 status: "active"
             })
+            
             // TODO: Product list
+            let filter = {
+                brand: brandDetail._id,
+                status: "active"
+            }
+            const total = await productSvc.countData(filter)
+            const limit = +req.query.limit || 10;
+            const page = +req.query.page || 1;
+            const skip = (page -1) * limit;
+
+            let product = await productSvc.getData(filter, {limit, skip})
             res.json({
-               result: {
-                detail: brandDetail,
-                products: null
-               },
-               message: "Brand Detail from Slug",
-               meta: null
+                result: {
+                    detail: brandDetail,
+                    products: product
+                },
+                message: "Brand Detail from Slug",
+                meta: {
+                    total: total,
+                    page: page,
+                    limit: limit
+                }
             })
-        }catch(exception){
-            next(exceptioin)
+        } catch (exception) {
+            next(exception)
         }
     }
 }

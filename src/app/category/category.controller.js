@@ -1,11 +1,12 @@
 const { deleteFile } = require('../../config/helpers')
 const CategoryRequest = require('./category.request')
+const productSvc = require('../product/product.service')
 const categorySvc = require('./category.service')
 
 class CategoryController {
     // 
-    createCategory= async (req, res, next) => {
-        try{
+    createCategory = async (req, res, next) => {
+        try {
             let payload = (new CategoryRequest(req)).createTransform()
             const createdCat = await categorySvc.create(payload)
             res.json({
@@ -13,37 +14,37 @@ class CategoryController {
                 message: "Category Created Successfully",
                 meta: null
             })
-        }catch(exception){
+        } catch (exception) {
             next(exception)
         }
     }
-    listAllBanners = async (req, res, next)=>{
-        try{    
-            const {filter, pagination: {page, limit, skip}}= categorySvc.getFilter(req.query, req.authUser)
-                const count = await categorySvc.countData(filter)
-                const data = await categorySvc.getData(filter, {page, limit, skip})
+    listAllBanners = async (req, res, next) => {
+        try {
+            const { filter, pagination: { page, limit, skip } } = categorySvc.getFilter(req.query, req.authUser)
+            const count = await categorySvc.countData(filter)
+            const data = await categorySvc.getData(filter, { page, limit, skip })
 
-                res.json({
-                    result: data,
-                    message: "Category Fetched Successfully",
-                    meta: {
-                        page: page,
-                        total: count,
-                        limit: limit
-                    }
-                })
-            }
-        catch(exception){
+            res.json({
+                result: data,
+                message: "Category Fetched Successfully",
+                meta: {
+                    page: page,
+                    total: count,
+                    limit: limit
+                }
+            })
+        }
+        catch (exception) {
             next(exception)
         }
     }
-    getById = async(req, res, next)=>{
-        try{
+    getById = async (req, res, next) => {
+        try {
             let filter = {
-                _id : req.params.id,             
+                _id: req.params.id,
             }
-            if(req.authUser.role !== 'root'){
-                filter= {
+            if (req.authUser.role !== 'root') {
+                filter = {
                     ...filter,
                     createdBy: req.authUser._id
                 }
@@ -54,16 +55,16 @@ class CategoryController {
                 message: "Category Detail fetched",
                 meta: null
             })
-        }catch(exception){
+        } catch (exception) {
             next(exception)
         }
     }
-    updateById = async (req, res, next)=>{
-        try{    
+    updateById = async (req, res, next) => {
+        try {
             const category = req.content
             const payload = (new CategoryRequest(req)).updateTransform(category)
             const updated = await categorySvc.updateById(req.params.id, payload)
-            if(payload.image && updated.image && updated.image !== payload.image){
+            if (payload.image && updated.image && updated.image !== payload.image) {
                 deleteFile('./public/uploads/category/', updated.image)
             }
 
@@ -72,14 +73,14 @@ class CategoryController {
                 message: "Category Updated",
                 meta: null
             })
-        }catch(exception){
+        } catch (exception) {
             next(exception)
         }
     }
-    deleteById = async(req, res, next)=>{
-        try{
+    deleteById = async (req, res, next) => {
+        try {
             let deleted = await categorySvc.deleteById(req.params.id)
-            if(deleted.image){
+            if (deleted.image) {
                 deleteFile('./public/uploads/category/', deleted.image)
             }
             res.json({
@@ -87,9 +88,100 @@ class CategoryController {
                 message: "Category Deleted Successfully",
                 meta: null
             })
-        }catch(exception){
+        } catch (exception) {
             next(exception)
         }
+    }
+    listForHome = async (req, res, next) => {
+        try {
+            let { filter, pagination: { page, limit, skip } } = categorySvc.getFilter(req.query, req.authUser)
+            filter = {
+                $and: [
+                    ...filter['$and'],
+                    { status: "active" }
+                ]
+            }
+            const count = await categorySvc.countData(filter)
+            const data = await categorySvc.getData(filter, { page, limit, skip })
+
+            res.json({
+                result: data,
+                message: "Category Fetched Successfully",
+                meta: {
+                    page: page,
+                    total: count,
+                    limit: limit
+                }
+            })
+        }
+        catch (exception) {
+            next(exception)
+        }
+    }
+    getBySlug = async (req, res, next) => {
+        try {
+            let filter = {
+                slug: req.params.slug,
+                status: "active"
+            }
+            let detail = await categorySvc.getBySlugWithProduct(filter)
+            let prodFilter = [
+                {category: {$in: [detail[0]._id], $nin: null}},
+                {status: "active"}
+            ]
+
+            if(req.query.search){
+                prodFilter = {
+                    $and: [
+                        ...prodFilter,
+                        {$or: [
+                            {title: new RegExp(req.query.search, 'i')},
+                            {summary: new RegExp(req.query.search, 'i')},
+                            {description: new RegExp(req.query.search, 'i')},
+                        ]}
+                    ]
+                }
+            } else {
+                prodFilter = {
+                    $and: [
+                        ...prodFilter
+                    ]
+                }
+            }
+
+            let sort = {_id: "desc", title: "asc"}
+            if(req.query.sort) {
+                // key, dire
+                // ?sort=price,asc
+                // price => desc
+                let sortsplit = req.query.sort.split(',');  // ["price","asc"]
+                // {price: "asc"}
+                sort = {[sortsplit[0]]: sortsplit[1]}
+            }
+
+
+            const total = await productSvc.countData(prodFilter)
+            const limit = +req.query.limit || 10;
+            const page = +req.query.page || 1;
+            const skip = (page -1) * limit;
+
+            const products = await productSvc.getData(prodFilter, {limit, skip}, sort)
+            res.json({
+                result: {
+                    detail,
+                    products
+                },
+                message: "Category Detail fetched",
+                meta: {
+                    total: total,
+                    page: page,
+                    limit: limit
+                }
+            })
+        } catch (exception) {
+            next(exception)
+        }
+
     }
 }
 

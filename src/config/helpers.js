@@ -6,12 +6,16 @@ const generateRandomString = (len = 100)=>{
     let random = ""
 
     for(let i =0; i<= len; i++){
-        let posn = Math.ceil(Math.random() * (lengths - 1))
+        let posn = generateRandomNumber(lengths - 1)
         random += chars[posn]
     }
     return random
 }
 
+const generateRandomNumber = (limit, lower=0)=>{
+    let posn = Math.ceil(lower +(Math.random() * limit))
+    return posn
+}
 const getTokenFromHeader = (req) =>{
     let token = null;
     if (req.query['token']) {
@@ -31,4 +35,4 @@ deleteFile = (path, filename) =>{
         fs.unlinkSync(path + filename)
     }
 }
-module.exports = {generateRandomString, getTokenFromHeader, deleteFile}
+module.exports = {generateRandomString, generateRandomNumber, getTokenFromHeader, deleteFile}

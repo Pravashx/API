@@ -2,12 +2,12 @@ const mongoose = require('mongoose')
 
 const CategorySchema = new mongoose.Schema({
     title: {
-        type: String, 
-        required: true, 
+        type: String,
+        required: true,
         min: 3,
         unique: true
     },
-    description: String, 
+    description: String,
     slug: {
         type: String,
         unique: true,
@@ -18,9 +18,9 @@ const CategorySchema = new mongoose.Schema({
         ref: "Category",
         requried: false
     },
-    image: String, 
+    image: String,
     status: {
-        type: String, 
+        type: String,
         enum: ['active', 'inactive'],
         default: "inactive"
     },
@@ -30,10 +30,10 @@ const CategorySchema = new mongoose.Schema({
         default: null
     }
 }, {
-    autoCreate: true, 
-    autoIndex: true, 
+    autoCreate: true,
+    autoIndex: true,
     timestamps: true
 })
 
-const CategoryModel = mongoose.model("Category", CategorySchema)
-module.exports = CategoryModel;
+const CategoryModel = mongoose.model('category', CategorySchema)
+module.exports = CategoryModel; 

@@ -11,6 +11,7 @@ const AuthRequest = require('./auth.request');
 const { getTokenFromHeader, generateRandomString } = require('../../config/helpers');
 const UserModel = require('../user/user.model');
 
+
 class AuthController {
     register = async (req, res, next) => {
     // register = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -126,7 +127,11 @@ class AuthController {
                             refreshToken: refreshToken
                         }
                         await authSvc.storePAT(patData)
-        
+
+
+                        const  myEvent = req.myEvent              
+                        myEvent.emit('eventName', {name: "Test"})
+                            
                         res.json({
                             result: {
                                 token: token,

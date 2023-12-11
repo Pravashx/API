@@ -1,12 +1,12 @@
 const mongoose = require('mongoose')
 const BannerSchemaDef = new mongoose.Schema({
 
-    title:{
+    title: {
         type: String,
         required: true,
         min: 3
     },
-    url : String,
+    url: String,
     image: {
         type: String,
         required: true

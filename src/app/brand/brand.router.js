@@ -6,7 +6,7 @@ const uploader = require('../../middlewares/uploader.middleware');
 const ValidateRequest = require('../../middlewares/validate-request-middleware');
 const { BrandRequestSchema } = require('./brand.validator');
 
-const dirSet = (req, res, next)=>{
+const dirSet = (req, res, next) => {
     req.uploadDir = "./public/uploads/brand/"
     next()
 }
@@ -17,7 +17,7 @@ router.route('/')
         CheckLogin,
         CheckPermission('admin'),
         brandCtrl.listAllBrands
-        )
+    )
     .post(
         CheckLogin,
         CheckPermission('admin'),
@@ -25,8 +25,8 @@ router.route('/')
         uploader.single('image'),
         ValidateRequest(BrandRequestSchema),
         brandCtrl.brandCreate
-        )
-   
+    )
+
 router.route('/:id')
     .get(
         CheckLogin,
@@ -46,4 +46,5 @@ router.route('/:id')
         CheckPermission('admin'),
         brandCtrl.deleteById
     )
+
 module.exports = router;
