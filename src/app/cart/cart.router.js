@@ -13,4 +13,22 @@ ValidateRequest(addToCartSchema),
 cartCtrl.addToCart
 )
 
+router.get('/list', 
+CheckLogin,
+CheckPermission(['customer', 'admin']),
+cartCtrl.listCart
+)
+
+router.delete('/:id/delete', 
+CheckLogin,
+CheckPermission(['customer', 'admin']),
+cartCtrl.deleteItemFromCart
+)
+
+router.post('/order',
+CheckLogin,
+CheckPermission(['customer', 'admin']),
+cartCtrl.createOrder
+)
+
 module.exports = router

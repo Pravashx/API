@@ -182,16 +182,17 @@ class BrandController {
                 brand: brandDetail._id,
                 status: "active"
             }
+            console.log(filter)
             const total = await productSvc.countData(filter)
             const limit = +req.query.limit || 10;
             const page = +req.query.page || 1;
             const skip = (page -1) * limit;
-
-            let product = await productSvc.getData(filter, {limit, skip})
+            let products = await productSvc.getData(filter, {limit, skip})
+        
             res.json({
                 result: {
                     detail: brandDetail,
-                    products: product
+                    products: products
                 },
                 message: "Brand Detail from Slug",
                 meta: {

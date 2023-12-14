@@ -60,6 +60,8 @@ const UserSchemaDef = new mongoose.Schema({
     autoIndex: true
 });
 
-// const StateModel = mongoose.model("State")
-const UserModel = mongoose.model("User", UserSchemaDef);
+
+
+const UserModel = mongoose.model("User", UserSchemaDef)
+
 module.exports = UserModel;

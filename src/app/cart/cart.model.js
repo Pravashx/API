@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { string } = require('zod');
+
 
 const CartSchema = new mongoose.Schema({
     orderId: {
@@ -9,7 +9,7 @@ const CartSchema = new mongoose.Schema({
     },
     buyerId: {
         type: mongoose.Types.ObjectId,
-        ref: 'user',
+        ref: 'User',
         required: true
     },
     productId:{
@@ -40,7 +40,7 @@ const CartSchema = new mongoose.Schema({
     seller: {
         type: mongoose.Types.ObjectId,
         ref: "User",
-        require: true
+        require: false
     },
     status: {
         type: String,
@@ -48,6 +48,10 @@ const CartSchema = new mongoose.Schema({
         default: 'new'
     }
 
+},{
+    timestamps: true,
+    autoCreate: true,
+    autoIndex: true
 })
 
 const CartModel = mongoose.model('Cart', CartSchema)
