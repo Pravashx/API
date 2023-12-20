@@ -70,7 +70,6 @@ class CartController {
     createOrder = async(req, res, next)=>{
         try{
             const cartIds = req.body;
-            console.log(cartIds)
             
             const filter = {
                 _id: {$in: cartIds},
@@ -107,6 +106,27 @@ class CartController {
             })
         }
         catch(exception){
+            next(exception)
+        }
+    }
+
+    listOrder = async (req, res, next)=>{
+        try{
+            let user = req.authUser
+            let filter = {orderId: {$ne: null}}
+            if(user.role !== 'admin'){
+                filter = {
+                    ...filter,
+                    buyerId : user._id
+                }
+            }
+            let detail = await cartSvc.getByFilter(filter)
+            res.json({
+                result: detail,
+                message: 'Your cart',
+                meta: null
+            })
+        }catch(exception){
             next(exception)
         }
     }

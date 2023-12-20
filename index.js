@@ -12,7 +12,7 @@ io.on("connection", (socket)=>{
     })
 })
 
-server.listen('3005', 'localhost', (err)=>{
+server.listen(process.env.PORT || 80, (err)=>{
     if(!err){
         console.log("Server Is Running Sir ^_^");
     }

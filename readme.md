@@ -39,7 +39,7 @@
     - Representational Stateless Transfer 
 
     - login ====> API ====> Process =======> Response 
-8
+
 
     login request ====> Token 
     webstoreage token  ====> SERVER
@@ -573,3 +573,116 @@ _id  title           slug           description  parentId    status  brand
 3   Smart Tv        smart-tv        null        2                    [1]
 ------------------------------------------------------------------------
 4   Fridge          fridge          null        1
+
+
+product CRUD 
+// title        ----> string, 
+[// slug         ===> Based on title, string, unique, one time entry no update]
+// summary      ----> String 
+// description (HTML editor) ----> string
+// category ----> ref ---> Category model, array 
+    category: [{
+        type: mongoose.Types.ObjectId,
+        ref: "Category",
+        default: null
+    }]
+// price        ----> Numeric min, 1
+// discount %  ----> Numeric, min: 0, max: 99
+[// afterDiscount ==> Autocalculate]
+// brand        -----> ref, Brand
+// attributes   -----> [{
+    key: String, 
+    value: String,
+}]
+// tags ===> 
+tags: [String]
+// seller       ----> ref, User
+// images       => [String]
+[createdBy]
+[updatedBy]
+[createdAt]
+[updatedAt]
+
+// sku ---> warehouseId, productId, floor, sec, seller, batch, 
+// stock 
+
+
+
+
+
+product 1       1000     5%         1200 10%
+
+
+
+
+productAssocition 
+productId
+associatedProducts 
+associatedPrice
+
+phone 123       ====> 
+headphone ===> 2000, 1500
+
+
+Request ===> Server 
+
+Connection 
+    Server Response 
+    Server Response 
+
+
+
+    Node Application        ----- Client 
+
+
+    Socket Server ------ client A, client B, client C
+
+
+VITE
+    >= 18
+
+
+Product 
+    Created         Admin, Seller
+    Updated         Admin, Seller
+    Listed          Admin, Seller
+    Deleted         Admin, Seller
+
+    Only Admin can CRUD on any products
+    Seller can CRUD on only their Products 
+    Admin needs to approve the product before Publishing
+
+
+fetch()
+    --- get the data 
+axios Select
+Superagent 
+
+XMLHttpRequest (XHR Request)
+ajax
+
+
+client to server 
+get, post, put, delete
+
+
+Product Review 
+    -> productId 
+    -> reviewerId 
+    -> review 
+    -> rate     (1-5)
+    
+/product/:productId/review -> post to create
+    (only loggedin customer ===> Only ordered by)
+/product/:productId/review -> put to update 
+    => Permission, reviewerId = authUser._id
+/product/:slug/review -> get Request
+
+
+Offers 
+Seller 
+Customer Dashbard 
+XP Calculation 
+    -> based on Purchase 
+    -> Convert purchase to XP by 0.5%
+    -> Product Purchase Redeem

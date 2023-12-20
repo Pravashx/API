@@ -31,4 +31,10 @@ CheckPermission(['customer', 'admin']),
 cartCtrl.createOrder
 )
 
+router.get('/order/list', 
+CheckLogin,
+CheckPermission(['customer', 'admin']),
+cartCtrl.listOrder
+)
+
 module.exports = router

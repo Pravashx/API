@@ -2,6 +2,7 @@ const express = require('express')
 const EventEmitter = require('node:events')
 const app = express();
 require('./db.config')
+require('./sequelize.config')
 const cors = require('cors')
 
 app.use(cors())
@@ -14,7 +15,7 @@ const event = require('./event.config');
 const { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLList, GraphQLID, GraphQLInt, GraphQLFloat } = require('graphql');
 const { createHandler } = require('graphql-http/lib/use/express');
 const categorySvc = require('../app/category/category.service');
-const { graphqlHTTP } = require('express-graphql');
+// const { graphqlHTTP } = require('express-graphql');
 // Body Parser
 app.use(express.json())
 app.use(express.urlencoded({
@@ -84,10 +85,10 @@ const schema = new GraphQLSchema({
     })
 })
 
-app.use('/api/v1/graphql', graphqlHTTP({
-    schema: schema,
-    graphiql: true
-}))
+// app.use('/api/v1/graphql', graphqlHTTP({
+//     schema: schema,
+//     graphiql: true
+// }))
 
 // app.all('/api/v1/graphql', createHandler({
 //     schema: schema
