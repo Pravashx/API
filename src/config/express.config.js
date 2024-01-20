@@ -10,6 +10,7 @@ const router = require('../router/index');
 const { MulterError } = require('multer');
 const {ZodError} = require('zod')
 const {MongooseError} =require('mongoose')
+const path = require('path')
 const event = require('./event.config');
 const { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLList, GraphQLID, GraphQLInt, GraphQLFloat } = require('graphql');
 const { createHandler } = require('graphql-http/lib/use/express');
@@ -20,6 +21,8 @@ app.use(express.json())
 app.use(express.urlencoded({
     extended: false
 }))
+
+app.use("/asset", express.static("./public/uploads"))
 
 app.use('/health', (req, res, next)=>{
     res.send("Success Ok")
