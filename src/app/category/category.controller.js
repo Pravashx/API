@@ -168,7 +168,7 @@ class CategoryController {
             const products = await productSvc.getData(prodFilter, {limit, skip}, sort)
             res.json({
                 result: {
-                    detail,
+                    detail:detail[0],
                     products
                 },
                 message: "Category Detail fetched",

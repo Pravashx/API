@@ -106,11 +106,11 @@ class BrandController {
         try {
             let brandId = req.params.id;
             await brandSvc.getById({
-                _id: id,
+                _id: brandId,
                 createdBy: req.authUser._id
             })
             let deleteBrand = await brandSvc.deleteById(brandId)
-            if (deletedBrand.image) {
+            if (deleteBrand.image) {
                 deleteFile('./public/uploads/brand/', deleteBrand.image)
             }
             res.json({

@@ -148,6 +148,7 @@ class CategoryService {
             throw exception
         }
     }
+    
     deleteById = async (id) => {
         try {
             let deleted = await CategoryModel.findByIdAndDelete(id)
